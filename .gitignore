@@ -1,0 +1,222 @@
+# Создано https://www.toptal.com/developers/gitignore/api/python,visualstudiocode, venv, git
+# Редактировать в https://www.toptal.com/developers/gitignore?templates=python,visualstudiocode, venv, git
+
+### Git ###
+# Создано git для резервных копий. Как отключить резервное копирование в Git:
+# $ git config --global mergetool.keepBackup false 
+*.оригинальный
+
+# Создан git при использовании инструментов слияния для устранения конфликтов
+*.РЕЗЕРВНОЕ КОПИРОВАНИЕ.* 
+*.БАЗА.*
+*.ЛОКАЛЬНАЯ.*
+*.УДАЛЕННАЯ.*
+* _BACKUP_*.txt
+*_BASE_*.txt
+*_LOCAL_*.txt
+*_REMOTE_*.txt
+
+### Python ###
+# Скомпилированные в байтах / оптимизированные / DLL файлы
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Расширения C 
+*.so
+
+# Дистрибутив / упаковка
+.Python 
+сборка/
+development-eggs/
+dist/
+Загрузки/
+eggs/
+.eggs/
+библиотека/
+lib64/
+части/
+sdist/
+var/
+wheels/
+поделиться /python-wheels/
+*.egg-информация / 
+.установлено.cfg
+*.egg
+МАНИФЕСТ
+
+# PyInstaller
+# Обычно эти файлы записываются скриптом python из шаблона
+# перед тем, как PyInstaller соберет exe-файл, чтобы ввести в него дату / другую информацию.
+* .манифест 
+* .спецификация
+
+# Журналы установки 
+pip-log.txt 
+pip-delete-this-directory.txt
+
+# Модульное тестирование / отчеты о покрытии 
+htmlcov/
+.токсины/
+.nox/
+.покрытие 
+.покрытие .*
+.кэш 
+nosetests.xml 
+coverage.xml 
+* .обложка 
+* .py, обложка 
+.гипотеза/
+.pytest_cache/
+обложка/
+
+# Переводы
+*.mo
+*.pot
+
+# Материал Django:
+*.log 
+local_settings.py 
+db.sqlite3 
+db.sqlite3-журнал
+
+ материал # Flask: 
+экземпляр/
+.webassets-кэш
+
+# Scrapy stuff:
+.scrapy
+
+# Документация Sphinx 
+docs /_build/
+
+# PyBuilder 
+.pybuilder / 
+цель/
+
+# Jupyter Notebook 
+.ipynb_checkpoints
+
+# IPython 
+profile_default/
+ipython_config.py
+
+# pyenv
+# Для библиотеки или пакета вы можете проигнорировать эти файлы, поскольку код
+# предназначен для запуска в нескольких средах; в противном случае проверьте их в:
+# .python-версия
+
+# pipenv
+# Согласно pypa / pipenv # 598, рекомендуется включить Pipfile .заблокировать систему управления версиями.
+# Однако, в случае совместной работы, при наличии зависимостей, зависящих от платформы, или зависимостей
+# не имея кроссплатформенной поддержки, pipenv может устанавливать зависимости, которые не работают, или нет.
+# установите все необходимые зависимости.
+#Pipfile.блокировка
+
+# поэзия
+# Аналогично Pipfile.lock, обычно рекомендуется включать poetry.lock в системе управления версиями.
+# Это особенно рекомендуется для двоичных пакетов для обеспечения воспроизводимости и чаще всего
+# обычно игнорируется для библиотек.
+# https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
+#poetry.lock
+
+# дпм
+# Аналогично Pipfile.lock, обычно рекомендуется включать pdm.lock в систему управления версиями.
+#pdm.lock
+# pdm хранит конфигурации всего проекта в .pdm.toml, но рекомендуется не включать его
+# в системе управления версиями.
+# https://pdm.fming.dev/#use-with-ide 
+.pdm.toml
+
+# PEP 582; используется, например, в github.com/David-OConnor/pyflow и github.com/pdm-project/pdm
+__pypackages__/
+
+# Начинка из сельдерея 
+celerybeat-расписание 
+celerybeat.pid
+
+# SageMath проанализировал файлы 
+*.sage.py
+
+# Среды 
+.env 
+.venv 
+env/
+venv/
+ENV / 
+env.bak/
+venv.bak/
+
+# Настройки проекта Spyder 
+.spyderproject 
+.spyproject
+
+# Настройки проекта Rope 
+.ropeproject
+
+# документация mkdocs 
+/сайт
+
+# mypy 
+.mypy_cache/
+.dmypy.json 
+dmypy.json
+
+# Проверка типов Pyre 
+.pyre/
+
+# статический анализатор типов pytype 
+.pytype/
+
+# Символы отладки Cython 
+cython_debug/
+
+# PyCharm
+ Конкретный шаблон # JetBrains поддерживается в отдельном файле JetBrains.gitignore, который можно
+# найти по ссылке https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
+# и который можно добавить в глобальный файл gitignore или объединить в этот файл. Для более детального использования
+ параметр # (не рекомендуется) вы можете раскомментировать следующее, чтобы игнорировать всю папку idea.
+#.idea/
+
+### Исправление для Python ###
+# Файл локальной конфигурации Poetry - https://python-poetry.org/docs/configuration/#local-configuration 
+poetry.toml
+
+# ruff 
+.ruff_cache/
+
+# Файлы конфигурации LSP 
+pyrightconfig.json
+
+### venv ###
+# Virtualenv
+# http://iamzed.com/2009/05/07/a-primer-on-virtualenv/
+[Bb]в
+[Ii] исключить
+[Ll]ib
+[Ll]ib64
+[Ll] обычный
+[Ss]крипты 
+pyvenv.cfg
+pip-selfcheck.json
+
+### VisualStudioCode ###
+.vscode/*
+!.vscode/настройки.json 
+!.vscode/задачи.json 
+!.vscode/запуск.json 
+!.vscode/расширения.json 
+!.vscode/*.фрагменты кода
+
+# Локальная история для кода Visual Studio 
+.история/
+
+# Встроенные расширения кода Visual Studio 
+* .vsix
+
+### Исправление VisualStudioCode ###
+# Игнорировать всю локальную историю файлов 
+.история 
+.ionide
+
+# Конец https://www.toptal.com/developers/gitignore/api/python,visualstudiocode, venv,git
