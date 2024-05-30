@@ -5,41 +5,29 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 import requests
 import torch
-from config import PRIVATE_KEY, PUBLIC_KEY, ALGORITHM, SMSRU_API_ID, ACCESS_TOKEN_GIGA, API_KEY_LOVO
+from transformers import BarkModel, AutoProcessor
+from bark import SAMPLE_RATE, generate_audio, preload_models
+from IPython.display import Audio
+from scipy.io.wavfile import write as write_wav
+import scipy
+from config import PRIVATE_KEY, PUBLIC_KEY, ALGORITHM, SMSRU_API_ID, ACCESS_TOKEN_GIGA
 
 
 
 #Синтез текста в голос
-def create_query():
-    url = "https://api.ttsmaker.com/v1/get-voice-list"
-
-    headers = {
-        'token': 'ttsmaker_demo_token',
-        'language': 'ru'
-    }
-
-    return requests.get(url, headers=headers)
-
-def create_tts(text: str):
-    url = "https://api.genny.lovo.ai/api/v1/tts"
-
-    payload = {
-        "speaker": "63b409eb241a82001d51c782",
-        "text": text,
-        "speed": 1
-    }
-    headers = {
-        "accept": "application/json",
-        "content-type": "application/json",
-        "X-API-KEY": API_KEY_LOVO
-    }
-
-    return requests.post(url, json=payload, headers=headers).json()
+def create_tts():
+    return preload_models()
 
     
 
-def text_in_audio(job_id: str):
-    pass
+def text_in_audio(text: str):
+    audio_array = generate_audio(text)
+
+    # save audio to disk
+    write_wav("bark_generation.wav", SAMPLE_RATE, audio_array)
+    
+    # play text in notebook
+    Audio(audio_array, rate=SAMPLE_RATE)
 
 #Генерация ответа GIGACHAT
 def get_response_from_gigachat():
@@ -111,16 +99,14 @@ def decode_token(token: str) -> dict:
         payload = jwt.decode(token, PUBLIC_KEY, algorithms=[ALGORITHM])
         return payload
     except jwt.JWTError as e:
-        print(f"JWTError: {e}")  # Добавьте отладочное сообщение
+        print(f"JWTError: {e}")             
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
 
 # Хеширование пароля
 def generate_password_hash(password: str):
     salt = bcrypt.gensalt()
-    # Хеширование пароля с использованием соли
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
-    # Возвращаем хешированный пароль в виде строки
     return hashed_password.decode('utf-8')
 
 # Проверка хеша пароля

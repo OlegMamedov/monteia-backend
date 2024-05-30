@@ -1,5 +1,4 @@
 import requests
-import json
 import uuid
 
 PRIVATE_KEY = '''-----BEGIN PRIVATE KEY-----
@@ -42,13 +41,6 @@ RQIDAQAB
 -----END PUBLIC KEY-----'''
 
 ALGORITHM = "RS256"
-
-#Синтез речи
-API_KEY_LOVO = 'fd2ef182-4006-4f35-9840-235cb5941ce3'
-
-# Nadezhda Smirnoff | 63b409f0241a82001d51c78e
-# Galina Ivanov | 63b409eb241a82001d51c782
-# Pyotr Semenov | 63b409ee241a82001d51c788
 
 #Подключение GigaChat
 url = "https://developers.sber.ru/docs/api/gigachat/auth/v2/oauth"

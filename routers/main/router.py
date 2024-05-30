@@ -13,7 +13,7 @@ from routers.main.schemas import RegisterSchema
 from database.utils import get_user_by_login, get_user_by_id_and_number, count_entry_by_user_id, delete_journal_by_entry_number, get_journal_by_entry_number_and_userid
 from database.db import async_session
 from config import ACCESS_TOKEN_GIGA
-from routers.main.utils import generate_password_hash, get_zodiac_sign, create_access_token, decode_token, generate_verify_code, send_verify_code, check_password, lucky_num, text_in_audio, create_tts, create_query
+from routers.main.utils import generate_password_hash, get_zodiac_sign, create_access_token, decode_token, generate_verify_code, send_verify_code, check_password, lucky_num, text_in_audio, create_tts
 
 
 router = APIRouter(prefix = "", tags=["Main"])
@@ -226,11 +226,13 @@ async def edit_entry(entry_number: int, content: str, token: str = Depends(oauth
 
 @router.post("/chat/")
 async def chat():
-    text = '''Привет, как дела?'''
+    text = '''Ваш день обещает быть насыщенным работой и возможными препятствиями. Будьте готовы защищать свои интересы и проявите стабильность и контроль в своих действиях. Возможна встреча с авторитетной личностью или принятие важных решений'''
     # response = create_tts(text)
     # print(response)
-    print(create_query())
-   
-    # text_in_audio()
-    return JSONResponse({'message': 'Voice was record'}, 201)
+    try:
+        text_in_audio(text)    # create_tts(text)
+        return JSONResponse({'message': 'Voice was record'}, 201)
+    
+    except:
+        return JSONResponse({'error': 'Voice was not record'}, 403)
     
