@@ -1,5 +1,5 @@
 from database.db import async_session
-from database.models import User, Journals, Cards, Divinations
+from database.models import User, Journals, Cards, Divinations, Auth
 from sqlalchemy import select, func, delete
 
 # async def get_user_by_token(token: str):
@@ -9,15 +9,22 @@ from sqlalchemy import select, func, delete
 
 #     return result.scalar()
 
-async def get_user_by_login(username: str):
-    query = (select(User).where(User.username == username))
+async def get_auth_by_login(number: str):
+    query = (select(Auth).where(Auth.number == number))
     async with async_session() as session:
         result = await session.execute(query)
 
     return result.scalar()
 
-async def get_user_by_id_and_number(id: int, username: str):
-    query = (select(User).where((User.id == id) & (User.username == username)))
+async def get_user_by_login(number: str):
+    query = (select(User).where(User.number == number))
+    async with async_session() as session:
+        result = await session.execute(query)
+
+    return result.scalar()
+
+async def get_user_by_id_and_login(id: int, number: str):
+    query = (select(User).where((User.id == id) & (User.number == number)))
     async with async_session() as session:
         result = await session.execute(query)
 

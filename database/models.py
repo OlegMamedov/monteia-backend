@@ -8,12 +8,10 @@ class User(Base):
     __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
-    username = Column(String)
     f_name = Column(String)
     l_name = Column(String)
     number = Column(String)
     birthday_date = Column(Date)
-    password_hash = Column(String)
     created_at = Column(DateTime)
     zodiac_sign = Column(String)
     lucky_rait = Column(Integer)
@@ -23,12 +21,15 @@ class User(Base):
 class Auth(Base):
     __tablename__ = 'auth'
     id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    number = Column(String)
+    code = Column(String)
 
 class Token(Base):
     __tablename__ = 'token'
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('user.id'))
+    auth_id = Column(Integer, ForeignKey('auth.id'))
     token = Column(String)
 
 class Divination(Base):
