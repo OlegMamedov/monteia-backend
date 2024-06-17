@@ -20,6 +20,10 @@ class User(Base):
     lucky_rait_time = Column(DateTime)
     role = Column(String, default="user")
 
+class Auth(Base):
+    __tablename__ = 'auth'
+    id = Column(Integer, primary_key=True)
+
 class Token(Base):
     __tablename__ = 'token'
 

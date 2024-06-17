@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from datetime import date
 
 class ChatRequest(BaseModel):
@@ -6,8 +6,6 @@ class ChatRequest(BaseModel):
 
 class RegisterSchema(BaseModel):
     number: str
-    username: str
-    password: str
     f_name: str
     l_name: str
     birthday_date: date

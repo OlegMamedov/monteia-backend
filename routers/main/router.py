@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 
 from database.models import User, Token, Journals, Cards
-from routers.main.schemas import RegisterSchema
+from routers.main.schemas import RegisterSchema, LoginSchema, AuthSchema
 from database.utils import get_user_by_login, get_user_by_id_and_number, count_entry_by_user_id, delete_journal_by_entry_number, get_journal_by_entry_number_and_userid, get_card_by_id, get_div_by_name
 from database.db import async_session
 from routers.main.utils import generate_password_hash, get_zodiac_sign, create_access_token, decode_token, generate_verify_code, send_verify_code, check_password, lucky_num, text_in_audio, get_response_from_gigachat
@@ -62,7 +62,7 @@ async def verificate_user(data: RegisterSchema):
     user = await get_user_by_login(data.number)
 
     if user:
-        return JSONResponse({'error': 'You number is ready in system'}, 401)
+        return JSONResponse({'error': 'Phone number already exists.'}, 401)
 
 
     user = User(number=data.number,
@@ -73,7 +73,6 @@ async def verificate_user(data: RegisterSchema):
                 lucky_rait_time = datetime.utcnow(),
                 lucky_rait = lucky_num(),
                 created_at = datetime.utcnow(),
-                username = data.username,
                 zodiac_sign = get_zodiac_sign(str(data.birthday_date)))
 
 
@@ -87,28 +86,29 @@ async def verificate_user(data: RegisterSchema):
 
 
 
-@router.post('/verificate/')
-async def verificate_number(number: str):
-    user = await get_user_by_login(number)
+@router.post('/login/')
+async def verificate_number(data: LoginSchema):
+    user = await get_user_by_login(data.number)
 
     if user:
         return JSONResponse({'error': 'You are ready in system'},401)
 
     code = generate_verify_code()
-    try:
-        send_verify_code(number, code)
+
+    sms_sent = send_verify_code(data.number, code)
+    if sms_sent:
         return JSONResponse({'message': 'Check code in your phone'})
-    except:
+    else:
         return JSONResponse({'error': 'Check your phone number'},401)
 
 
 
 
 @router.post('/auth/')
-async def auth(username: str = Form(), password: str = Form()):
-    user = await get_user_by_login(username)
+async def auth(data: AuthSchema):
+    user = await get_user_by_login(data.number)
 
-    if user and (check_password(password, user.password_hash) == True):
+    if user and user.code == data.code:
 
         token = create_access_token(data={"sub": user.l_name,
                                           "user_id": user.id,
