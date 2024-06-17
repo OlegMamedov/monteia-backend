@@ -1,12 +1,12 @@
 from database.db import async_session
-from database.models import User, Journals
+from database.models import User, Journals, Cards, Divinations
 from sqlalchemy import select, func, delete
 
 # async def get_user_by_token(token: str):
 #     query = (select(User).where(User.token == token))
 #     async with async_session() as session:
 #         result = await session.execute(query)
-    
+
 #     return result.scalar()
 
 async def get_user_by_login(username: str):
@@ -42,4 +42,18 @@ async def delete_journal_by_entry_number(entry_number: int, user_id: int):
     async with async_session() as session:
         await session.execute(query)
         await session.commit()
+
+async def get_card_by_id(id: int):
+    query = (select(Cards).where(Cards.id == id))
+    async with async_session() as session:
+        result = await session.execute(query)
+
+    return result.scalar()
+
+async def get_div_by_name(name: str):
+    query = (select(Divinations).where(Divinations.name == name))
+    async with async_session() as session:
+        result = await session.execute(query)
+
+    return result.scalar()
 

@@ -11,4 +11,13 @@ class RegisterSchema(BaseModel):
     f_name: str
     l_name: str
     birthday_date: date
-    
+
+class LoginSchema(BaseModel):
+    number: str
+
+class AuthSchema(BaseModel):
+    number: str
+    code: str
+
+class GadanieSchema(BaseModel):
+    pass

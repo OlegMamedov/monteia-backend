@@ -1,41 +1,70 @@
 import bcrypt
 from fastapi import HTTPException
 import random
+import json
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
+from fastapi.responses import FileResponse
 import requests
-import torch
-from transformers import BarkModel, AutoProcessor
-from bark import SAMPLE_RATE, generate_audio, preload_models
-from IPython.display import Audio
-from scipy.io.wavfile import write as write_wav
-import scipy
-from config import PRIVATE_KEY, PUBLIC_KEY, ALGORITHM, SMSRU_API_ID, ACCESS_TOKEN_GIGA
-
+from config import PRIVATE_KEY, PUBLIC_KEY, ALGORITHM, SMSRU_API_ID
+from starlette.background import BackgroundTasks
+from gtts import gTTS
+import uuid
+import os
+from config import AUTH_GIGACHAT
 
 
 #Синтез текста в голос
-def create_tts():
-    return preload_models()
-
-    
+def remove_file(path: str):
+    try:
+        os.remove(path)
+    except Exception as e:
+        print(f"Error removing file: {e}")
 
 def text_in_audio(text: str):
-    audio_array = generate_audio(text)
 
-    # save audio to disk
-    write_wav("bark_generation.wav", SAMPLE_RATE, audio_array)
-    
-    # play text in notebook
-    Audio(audio_array, rate=SAMPLE_RATE)
+    filename = f"{uuid.uuid4()}.mp3"
+    filepath = os.path.join("static", filename)
+
+    # Создание аудио из текста
+    tts = gTTS(text, lang='ru')
+    tts.save(filepath)
+
+    return FileResponse(path=filepath, filename=filename, media_type='audio/mpeg')
+
+
+
 
 #Генерация ответа GIGACHAT
-def get_response_from_gigachat():
-    message = '''Представь что ты гадалка. Объясни значение каждой карты в контексте моего запроса кратко, в конце подвети кратко итоги всего расклада
-                 Запрос: Расклад на неделю
-                 Выпавшие карты: шут, справедливость, паж кубов
+def get_access_token_from_gigachat():
+    url = "https://developers.sber.ru/docs/api/gigachat/auth/v2/oauth"
 
-                 Ответ дай в формате json, пример: {"cards": [{"id": "шут", "text": предсказание по карте}], "sum": итог}'''
+    payload={
+    "scope": "GIGACHAT_API_PERS"
+    }
+    headers = {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'Accept': 'application/json',
+    "Authorization": f"Basic {AUTH_GIGACHAT}",
+    "RqUID": str(uuid.uuid4())
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+
+    ACCESS_TOKEN_GIGA = response.json().get("access_token")
+
+    return ACCESS_TOKEN_GIGA
+
+def get_response_from_gigachat(query: str, cards: list):
+
+    ACCESS_TOKEN_GIGA = get_access_token_from_gigachat()
+    crd = json.dumps(cards).replace("[", "").replace("]", "").replace('"', "")
+    example = '{"cards": [{"id": "шут", "text": предсказание по карте}], "sum": итог}'
+    message = f'''Представь что ты гадалка. Объясни значение каждой карты в контексте моего запроса кратко, в конце подведи кратко итоги всего расклада
+                 Запрос: {query}
+                 Выпавшие карты: {crd}
+
+                 Ответ дай в формате json по примеру: {example}'''
 
     url = "https://developers.sber.ru/docs/api/gigachat/v1/chat/completions"
     headers = {
@@ -62,7 +91,13 @@ def get_response_from_gigachat():
 
     bot_message = response_data['choices'][0]['message']['content']
 
-    return bot_message
+    data_bot = json.loads(bot_message)
+
+    return data_bot
+
+# Генерация рандомного id карты
+def generate_random_card():
+    return random.randint(1, 78)
 
 # Генерация 6 значного кода
 def generate_verify_code(length=6):
@@ -87,7 +122,7 @@ def lucky_num():
 
 # Создание токена
 def create_access_token(data: dict):
-    to_encode = data.copy()  
+    to_encode = data.copy()
     expire = datetime.utcnow() + timedelta(days=30)
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, PRIVATE_KEY, algorithm=ALGORITHM)
@@ -99,7 +134,7 @@ def decode_token(token: str) -> dict:
         payload = jwt.decode(token, PUBLIC_KEY, algorithms=[ALGORITHM])
         return payload
     except jwt.JWTError as e:
-        print(f"JWTError: {e}")             
+        print(f"JWTError: {e}")
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
 

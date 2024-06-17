@@ -42,24 +42,7 @@ RQIDAQAB
 
 ALGORITHM = "RS256"
 
-#Подключение GigaChat
-url = "https://developers.sber.ru/docs/api/gigachat/auth/v2/oauth"
-
-auth = "ZDYyYTgxOTgtN2Y3OC00NWQyLTkzNzAtMGVlYzYwYTY5NWI3OjVmMjUxYTE4LWEzOGQtNDlmOS04MGU0LTQyZjRjMTA3YmNmYQ=="
-
-payload={
-  "scope": "GIGACHAT_API_PERS"
-}
-headers = {
-'Content-Type': 'application/x-www-form-urlencoded',
-'Accept': 'application/json',
-"Authorization": f"Basic {auth}",
-"RqUID": str(uuid.uuid4())
-}
-
-response = requests.request("POST", url, headers=headers, data=payload)
-
-ACCESS_TOKEN_GIGA = response.json().get("access_token")
+AUTH_GIGACHAT = 'ZDYyYTgxOTgtN2Y3OC00NWQyLTkzNzAtMGVlYzYwYTY5NWI3OjVmMjUxYTE4LWEzOGQtNDlmOS04MGU0LTQyZjRjMTA3YmNmYQ=='
 
 # Отправка смс кода
 SMSRU_API_ID = 'your_sms_ru_api_key'

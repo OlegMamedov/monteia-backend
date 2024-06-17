@@ -56,10 +56,33 @@ class DivinationInfo(Base):
 
 class Journals(Base):
     __tablename__ = 'journals'
-    
+
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id'))
     entry_number = Column(Integer)
-    content = Column(Text) 
-    
+    content = Column(Text)
+
+class Cards(Base):
+    __tablename__ = 'cards'
+
+    id = Column(Integer, primary_key=True)
+    category = Column(String)
+    name = Column(String)
+    link_on_image = Column(String)
+
+class Divinations(Base):
+    __tablename__ = 'divinations'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    count_cards = Column(Integer)
+    comment = Column(String)
+
+class Positions(Base):
+    __tablename__ = 'positions'
+
+    id = Column(Integer, primary_key=True)
+    div_id = Column(Integer, ForeignKey('divinations.id'))
+    position_x = Column(Integer)
+    position_y = Column(Integer)
 
