@@ -22,7 +22,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/")
 
 
 @router.get('/user/me')
-async def get_user(token: str = Depends(oauth2_scheme)):
+async def get_user(token: str):
 
     payload = decode_token(token)
 
@@ -138,7 +138,7 @@ async def auth(data: AuthSchema):
 
 
 @router.post("/journal/add/entry")
-async def add_entry(text_for_entry: str, token: str = Depends(oauth2_scheme)):
+async def add_entry(text_for_entry: str, token: str):
     payload = decode_token(token)
 
     try:
@@ -164,7 +164,7 @@ async def add_entry(text_for_entry: str, token: str = Depends(oauth2_scheme)):
 
 
 @router.get("/journal/get/entry")
-async def get_journal(entry_number: int, token: str = Depends(oauth2_scheme)):
+async def get_journal(entry_number: int, token: str):
     payload = decode_token(token)
 
     try:
@@ -185,7 +185,7 @@ async def get_journal(entry_number: int, token: str = Depends(oauth2_scheme)):
             "content": journal.content}
 
 @router.delete("/journal/delete/entry")
-async def del_entry(entry_number: int, token: str = Depends(oauth2_scheme)):
+async def del_entry(entry_number: int, token: str):
     payload = decode_token(token)
 
     try:
@@ -211,7 +211,7 @@ async def del_entry(entry_number: int, token: str = Depends(oauth2_scheme)):
     return JSONResponse({'message': 'Entry was deleted success'}, 201)
 
 @router.post("/journal/edit/entry")
-async def edit_entry(entry_number: int, content: str, token: str = Depends(oauth2_scheme)):
+async def edit_entry(entry_number: int, content: str, token: str):
     payload = decode_token(token)
 
     try:
