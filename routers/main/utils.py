@@ -24,7 +24,7 @@ def remove_file(path: str):
 def text_in_audio(text: str):
 
     filename = f"{uuid.uuid4()}.mp3"
-    filepath = os.path.join("static", filename)
+    filepath = os.path.join("static/audio", filename)
 
     # Создание аудио из текста
     tts = gTTS(text, lang='ru')

@@ -11,7 +11,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from database.models import User, Token, Journals, Cards, Auth
 from routers.main.schemas import RegisterSchema, LoginSchema, AuthSchema
-from database.utils import get_user_by_login, get_auth_by_login, get_user_by_id_and_login, count_entry_by_user_id, delete_journal_by_entry_number, get_journal_by_entry_number_and_userid, get_card_by_id, get_div_by_name
+from database.utils import get_user_by_login, get_auth_by_login, get_user_by_id_and_login, count_entry_by_user_id, delete_journal_by_entry_number, get_journal_by_entry_number_and_userid, get_card_by_id, get_div_by_id
 from database.db import async_session
 from routers.main.utils import get_zodiac_sign, create_access_token, decode_token, generate_verify_code, send_verify_code, lucky_num, text_in_audio, get_response_from_gigachat
 
@@ -235,8 +235,8 @@ async def edit_entry(entry_number: int, content: str, token: str):
 
 
 @router.post("/chat/")
-async def chat(query: str):
-    div = get_div_by_name(query)
+async def chat(query: str, id: int):
+    div = await get_div_by_id(id)
 
     randomId_cards = []
     randomName_card = []

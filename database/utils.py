@@ -57,8 +57,8 @@ async def get_card_by_id(id: int):
 
     return result.scalar()
 
-async def get_div_by_name(name: str):
-    query = (select(Divinations).where(Divinations.name == name))
+async def get_div_by_id(id: str):
+    query = (select(Divinations).where(Divinations.id == id))
     async with async_session() as session:
         result = await session.execute(query)
 
