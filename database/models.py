@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, BigInteger, Float, DateTime, ForeignKey, Date, Text, Boolean
 from sqlalchemy.ext.declarative import declarative_base
+from datetime import datetime, timedelta
 
 
 Base = declarative_base()
@@ -25,6 +26,9 @@ class Auth(Base):
     number = Column(String)
     code = Column(String)
     expiration_time = Column(DateTime)
+
+    def is_code_valid(self):
+        return datetime.now() < self.expiration_time
 
 class Token(Base):
     __tablename__ = 'token'
