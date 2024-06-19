@@ -45,7 +45,8 @@ ALGORITHM = "RS256"
 AUTH_GIGACHAT = 'ZDYyYTgxOTgtN2Y3OC00NWQyLTkzNzAtMGVlYzYwYTY5NWI3OjVmMjUxYTE4LWEzOGQtNDlmOS04MGU0LTQyZjRjMTA3YmNmYQ=='
 
 # Отправка смс кода
-SMSRU_API_ID = 'your_sms_ru_api_key'
+GREEN_SMS_USER = 'erikoMir'
+GREEN_SMS_PASSWORD = 'dUm-Vsw-tGC-xq3'
 
 
 POSTGRES_USER = 'postgres'

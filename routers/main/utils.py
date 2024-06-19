@@ -6,9 +6,10 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from fastapi.responses import FileResponse
 import requests
-from config import PRIVATE_KEY, PUBLIC_KEY, ALGORITHM, SMSRU_API_ID
+from config import PRIVATE_KEY, PUBLIC_KEY, ALGORITHM, GREEN_SMS_PASSWORD, GREEN_SMS_USER
 from starlette.background import BackgroundTasks
 from gtts import gTTS
+from greensms.client import GreenSMS
 import uuid
 import os
 from config import AUTH_GIGACHAT
@@ -105,16 +106,9 @@ def generate_verify_code(length=6):
 
 # Отправка кода по номеру
 def send_verify_code(phone_number, code):
-    url = 'https://sms.ru/sms/send'
-    payload = {
-        'api_id': SMSRU_API_ID,
-        'to': phone_number,
-        'msg': f"Ваш код подтверждения: {code}",
-        'json': 1
-    }
-
-    response = requests.get(url, params=payload)
-    return response.json()
+    message = f'Ваш код подтверждения: {code}. Никому его не показывайте.'
+    client = GreenSMS(user=GREEN_SMS_USER, password=GREEN_SMS_PASSWORD)
+    client.sms.send(to=phone_number, txt=message)
 
 # Генерация числа удачи
 def lucky_num():
