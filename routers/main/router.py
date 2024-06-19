@@ -92,12 +92,13 @@ async def verificate_number(data: LoginSchema):
     if not user:
         return JSONResponse({'error': 'Phone number not found.'},401)
 
-
+    exp_time = datetime.utcnow() + timedelta(minutes=2)
     code = generate_verify_code()
 
     auth = Auth(user_id = user.id,
                 number=data.number,
-                code=code)
+                code=code,
+                expiration_time=exp_time)
 
     async with async_session() as session:
         session.add(auth)
@@ -117,24 +118,29 @@ async def auth(data: AuthSchema):
     auth = await get_auth_by_login(data.number)
     user = await get_user_by_login(data.number)
 
-    if auth and auth.code == data.code:
+    if not auth:
+        return JSONResponse({'error': 'Invalid phone number'}, 401)
 
-        token = create_access_token(data={"sub": 'monteia',
-                                          "user_id": user.id,
-                                          "number": user.number})
+    if not auth.is_code_valid():
+        return JSONResponse({'error': 'Code has expired'}, 401)
 
-        new_token = Token(token = token,
-                          auth_id = auth.id)
+    if auth.code != data.code:
+        return JSONResponse({'error': 'Invalid code'}, 401)
 
-        async with async_session() as session:
-            session.add(new_token)
-            await session.commit()
+    token = create_access_token(data={"sub": 'monteia',
+                                        "user_id": user.id,
+                                        "number": user.number})
 
-        return {"access_token": token,
-                "token_type": "Bearer"}
+    new_token = Token(token = token,
+                        auth_id = auth.id)
 
+    async with async_session() as session:
+        session.add(new_token)
+        await session.commit()
 
-    return JSONResponse({'error': 'Not found'}, 404)
+    return {"access_token": token,
+            "token_type": "Bearer"}
+
 
 
 @router.post("/journal/add/entry")

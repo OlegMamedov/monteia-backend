@@ -24,6 +24,7 @@ class Auth(Base):
     user_id = Column(Integer, ForeignKey('user.id'))
     number = Column(String)
     code = Column(String)
+    expiration_time = Column(DateTime)
 
 class Token(Base):
     __tablename__ = 'token'
