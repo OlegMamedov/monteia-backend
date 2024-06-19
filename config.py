@@ -1,5 +1,9 @@
 import requests
 import uuid
+import json
+
+from routers.main.integration import P2p
+
 
 PRIVATE_KEY = '''-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDw7PVwN5pXVcn3
@@ -48,7 +52,12 @@ AUTH_GIGACHAT = 'ZDYyYTgxOTgtN2Y3OC00NWQyLTkzNzAtMGVlYzYwYTY5NWI3OjVmMjUxYTE4LWE
 GREEN_SMS_USER = 'erikoMir'
 GREEN_SMS_PASSWORD = 'dUm-Vsw-tGC-xq3'
 
+# Оплата
+SECRET_KEY = 'JIHNEEWWWZBPGNUPBMRZEDORWVFYWHDQ'
+MERCHANT_ID = '66717329e5614dff3f1256a1'
+API_URL = P2p('https://yourpayment.pro/api', MERCHANT_ID, SECRET_KEY)
 
+# SQLalchemy PostgreSQL
 POSTGRES_USER = 'postgres'
 POSTGRES_PASSWORD = '88355247'
 POSTGRES_HOST = 'localhost'

@@ -28,7 +28,7 @@ class Auth(Base):
     expiration_time = Column(DateTime)
 
     def is_code_valid(self):
-        return datetime.now() < self.expiration_time
+        return datetime.utcnow() < self.expiration_time
 
 class Token(Base):
     __tablename__ = 'token'
@@ -87,6 +87,7 @@ class Divinations(Base):
     name = Column(String)
     count_cards = Column(Integer)
     comment = Column(String)
+    price = Column(Float)
 
 class Positions(Base):
     __tablename__ = 'positions'
@@ -96,3 +97,12 @@ class Positions(Base):
     position_x = Column(Integer)
     position_y = Column(Integer)
 
+class Orders(Base):
+    __tablename__ = 'orders'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    div_id = Column(Integer, ForeignKey('divinations.id'))
+    order_id = Column(BigInteger)
+    price = Column(Float)
+    response_giga = Column(Text)

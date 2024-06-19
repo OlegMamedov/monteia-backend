@@ -9,8 +9,8 @@ from sqlalchemy import select, func, delete
 
 #     return result.scalar()
 
-async def get_auth_by_login(number: str):
-    query = (select(Auth).where(Auth.number == number))
+async def get_auth_by_login_and_code(number: str, code: str):
+    query = (select(Auth).where((Auth.number == number) & (Auth.code == code)))
     async with async_session() as session:
         result = await session.execute(query)
 

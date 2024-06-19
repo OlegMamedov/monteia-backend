@@ -8,12 +8,14 @@ from starlette.background import BackgroundTasks
 from fastapi import APIRouter, Depends, Form
 from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
+import aiohttp
 
-from database.models import User, Token, Journals, Cards, Auth
+from database.models import User, Token, Journals, Cards, Auth, Orders
 from routers.main.schemas import RegisterSchema, LoginSchema, AuthSchema
-from database.utils import get_user_by_login, get_auth_by_login, get_user_by_id_and_login, count_entry_by_user_id, delete_journal_by_entry_number, get_journal_by_entry_number_and_userid, get_card_by_id, get_div_by_id
+from database.utils import get_user_by_login, get_auth_by_login_and_code, get_user_by_id_and_login, count_entry_by_user_id, delete_journal_by_entry_number, get_journal_by_entry_number_and_userid, get_card_by_id, get_div_by_id
 from database.db import async_session
-from routers.main.utils import get_zodiac_sign, create_access_token, decode_token, generate_verify_code, send_verify_code, lucky_num, text_in_audio, get_response_from_gigachat
+from routers.main.utils import get_zodiac_sign, create_access_token, decode_token, generate_verify_code, send_verify_code, lucky_num, text_in_audio, get_response_from_gigachat, send_request
+from config import MERCHANT_ID, API_URL, SECRET_KEY
 
 
 router = APIRouter(prefix = "", tags=["Main"])
@@ -115,7 +117,7 @@ async def verificate_number(data: LoginSchema):
 
 @router.post('/auth/')
 async def auth(data: AuthSchema):
-    auth = await get_auth_by_login(data.number)
+    auth = await get_auth_by_login_and_code(data.number, data.code)
     user = await get_user_by_login(data.number)
 
     if not auth:
@@ -128,8 +130,8 @@ async def auth(data: AuthSchema):
         return JSONResponse({'error': 'Invalid code'}, 401)
 
     token = create_access_token(data={"sub": 'monteia',
-                                        "user_id": user.id,
-                                        "number": user.number})
+                                      "user_id": user.id,
+                                      "number": user.number})
 
     new_token = Token(token = token,
                         auth_id = auth.id)
@@ -265,6 +267,35 @@ async def chat(query: str, id: int):
         JSONResponse({'error': 'bot was not responses'}, 401)
 
 
+@router.get('/buy/')
+async def get_status(buy_id: int, token: str):
+    payload = decode_token(token)
 
+    try:
+        id = payload.get("user_id")
+        number = payload.get("number")
+    except:
+        JSONResponse({'error': 'You don\'t authenticated'})
 
+    user = await get_user_by_id_and_login(id, number)
+    div = await get_div_by_id(buy_id)
 
+    buy_order = API_URL.create_order(
+        type_ = 'buy',  # Тип ордера
+        amount = div.price * 100,  # Сумма платежа в минорных единицах
+        currency = 'RUB',  # Валюта
+        method_type = 'card_number',  # Тип: phone_number, card_number
+        customer_id = user.id,  # Customer ID
+        invoice_id = 'invoice1'  # Invoice ID
+    )
+
+    order_id = buy_order["order_id"]
+
+    new_order = Orders(user_id=user.id,
+                       div_id =div.id,
+                       order_id=order_id)
+    async with async_session() as session:
+        session.add(new_order)
+        await session.commit()
+
+    return JSONResponse({'link': f'https://secure.legitpay.io/payment/{order_id}'})

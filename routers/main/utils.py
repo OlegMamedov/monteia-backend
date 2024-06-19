@@ -12,6 +12,7 @@ from gtts import gTTS
 from greensms.client import GreenSMS
 import uuid
 import os
+import hashlib
 from config import AUTH_GIGACHAT
 
 
@@ -95,6 +96,27 @@ def get_response_from_gigachat(query: str, cards: list):
     data_bot = json.loads(bot_message)
 
     return data_bot
+
+
+def create_signature(secret_key, request_data):
+    # Create the signature by concatenating the secret key and the JSON data
+    signature_data = f"{secret_key}{json.dumps(request_data)}"
+    # Calculate the MD5 hash of the signature data
+    signature = hashlib.md5(signature_data.encode()).hexdigest()
+    return signature
+
+def send_request(api_url, merchant_id, request_data, secret_key):
+    # Create the signature
+    signature = create_signature(secret_key, request_data)
+    # Prepare the request data
+    data = {
+        "merchant_id": merchant_id,
+        "signature": signature,
+        **request_data
+    }
+    # Send the POST request
+    response = requests.post(api_url, json=data)
+    return response
 
 # Генерация рандомного id карты
 def generate_random_card():
