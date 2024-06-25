@@ -1,5 +1,5 @@
 from database.db import async_session
-from database.models import User, Journals, Cards, Divinations, Auth
+from database.models import User, Journals, Cards, Divinations, Auth, Orders, Tags, Reviews
 from sqlalchemy import select, func, delete
 
 # async def get_user_by_token(token: str):
@@ -64,3 +64,26 @@ async def get_div_by_id(id: str):
 
     return result.scalar()
 
+async def get_order_by_user_id(user_id: str):
+    query = (select(Orders)
+             .where(Orders.user_id == user_id)
+             .order_by(Orders.id.desc())
+             .limit(1))
+    async with async_session() as session:
+        result = await session.execute(query)
+
+    return result.scalar()
+
+async def delete_tag_by_id(tag_id: int, user_id: int):
+    query = delete(Tags).where((Tags.id == tag_id) & (Tags.user_id  == user_id))
+    async with async_session() as session:
+        await session.execute(query)
+        await session.commit()
+
+async def get_reviews():
+    query = (select(Reviews.name, Reviews.rating, Reviews.review, Reviews.created_at))
+    async with async_session() as session:
+        result = await session.execute(query)
+        reviews = result.all()
+
+    return [{"name": row[0], "rating": row[1], "review": row[2], "created_at": row[3]} for row in reviews]

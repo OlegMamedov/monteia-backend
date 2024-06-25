@@ -1,6 +1,7 @@
 import datetime
 import random
 import json
+import uuid
 
 from datetime import timedelta, datetime
 from starlette.background import BackgroundTasks
@@ -10,11 +11,33 @@ from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer
 import aiohttp
 
-from database.models import User, Token, Journals, Cards, Auth, Orders
-from routers.main.schemas import RegisterSchema, LoginSchema, AuthSchema
-from database.utils import get_user_by_login, get_auth_by_login_and_code, get_user_by_id_and_login, count_entry_by_user_id, delete_journal_by_entry_number, get_journal_by_entry_number_and_userid, get_card_by_id, get_div_by_id
+from database.models import User, Token, Journals, Cards, Auth, Orders, Tags, Reviews
+from routers.main.schemas import RegisterSchema, LoginSchema, AuthSchema, ReviewSchema
+from database.utils import (
+    get_user_by_login,
+    get_auth_by_login_and_code,
+    get_user_by_id_and_login,
+    count_entry_by_user_id,
+    delete_journal_by_entry_number,
+    get_journal_by_entry_number_and_userid,
+    get_card_by_id,
+    get_div_by_id,
+    get_order_by_user_id,
+    delete_tag_by_id,
+    get_reviews
+    )
 from database.db import async_session
-from routers.main.utils import get_zodiac_sign, create_access_token, decode_token, generate_verify_code, send_verify_code, lucky_num, text_in_audio, get_response_from_gigachat, send_request
+from routers.main.utils import (get_zodiac_sign,
+                                create_access_token,
+                                decode_token,
+                                generate_verify_code,
+                                send_verify_code, lucky_num,
+                                get_response_from_gigachat,
+                                send_request,
+                                get_order_status,
+                                text_in_audio
+                                )
+
 from config import MERCHANT_ID, API_URL, SECRET_KEY
 
 
@@ -74,7 +97,9 @@ async def verificate_user(data: RegisterSchema):
                 lucky_rait_time = datetime.utcnow(),
                 lucky_rait = lucky_num(),
                 created_at = datetime.utcnow(),
-                zodiac_sign = get_zodiac_sign(str(data.birthday_date)))
+                zodiac_sign = get_zodiac_sign(str(data.birthday_date)),
+                referal_link = uuid.uuid4()
+                )
 
 
     try:
@@ -131,7 +156,8 @@ async def auth(data: AuthSchema):
 
     token = create_access_token(data={"sub": 'monteia',
                                       "user_id": user.id,
-                                      "number": user.number})
+                                      "number": user.number
+                                      })
 
     new_token = Token(token = token,
                         auth_id = auth.id)
@@ -162,7 +188,8 @@ async def add_entry(text_for_entry: str, token: str):
 
     entry = Journals(user_id=user.id,
                      entry_number=nums_entry + 1,
-                     content = text_for_entry)
+                     content = text_for_entry
+                     )
 
     async with async_session() as session:
         session.add(entry)
@@ -244,27 +271,11 @@ async def edit_entry(entry_number: int, content: str, token: str):
 
 @router.post("/chat/")
 async def chat(query: str, id: int):
-    div = await get_div_by_id(id)
 
-    randomId_cards = []
-    randomName_card = []
-    while len(randomId_cards) < div.id:
-        randomId_cards.append(random.randint(1, 78))
 
-    for i in randomId_cards:
-        card = await get_card_by_id(i)
-        randomName_card.append(card.name)
-    try:
-        chat_response = get_response_from_gigachat(query, randomName_card)
-        audio_response = []
-        for i in chat_response["cards"]:
-            audio_response.append(text_in_audio(i["text"]))
+        return "All good"
 
-        audio_response.append(chat_response["sum"])
-        return audio_response
 
-    except:
-        JSONResponse({'error': 'bot was not responses'}, 401)
 
 
 @router.get('/buy/')
@@ -299,3 +310,144 @@ async def get_status(buy_id: int, token: str):
         await session.commit()
 
     return JSONResponse({'link': f'https://secure.legitpay.io/payment/{order_id}'})
+
+@router.get('/get/divination')
+async def get_div(token: str, div_id: int, query: str):
+    payload = decode_token(token)
+
+    forbidden_words = ['Смерть',
+                       'Умереть',
+                       'Самоубийство',
+                       'Убить'
+                       ]
+
+    try:
+        id = payload.get("user_id")
+        number = payload.get("number")
+    except:
+        JSONResponse({'error': 'You don\'t authenticated'})
+
+    user = await get_user_by_id_and_login(id, number)
+    order = await get_order_by_user_id(user.id)
+
+    # if get_order_status(order.id) == 'wait pay':
+    #     JSONResponse({'error': 'wait pay'})
+
+    div = await get_div_by_id(div_id)
+
+    randomId_cards = []
+    randomName_card = []
+    while len(randomId_cards) < div.count_cards:
+        randomId_cards.append(random.randint(1, 78))
+
+    for i in randomId_cards:
+        card = await get_card_by_id(i)
+        randomName_card.append(card.name)
+
+    try:
+        chat_response = get_response_from_gigachat(query, randomName_card)
+        # chat_response = {"cards": [{"id": "старуха", "text": "В прошлой жизни вы были мудрой и уважаемой женщиной."},
+        #                            {"id": "сиды", "text": "Вы были связаны с магией и тайными знаниями."},
+        #                            {"id": "дикая охота", "text": "Ваша жизнь была полна приключений и опасностей."}],
+        #                 "sum": "В прошлой жизни вы были мудрой женщиной, связанной с магией и тайными знаниями, и ваша жизнь была полна приключений и опасностей."}
+        audio_response = []
+        for i in chat_response["cards"]:
+            audio_response.append(i["id"])
+            for j in i["text"]:
+                if j in forbidden_words:
+                    return JSONResponse({'error': 'The answer has forbidden words'})
+            audio_response.append(i["text"])
+            print(audio_response)
+            text_in_audio(audio_response)
+            audio_response = []
+
+        audio_response.append(chat_response["sum"])
+        print(str(audio_response))
+        text_in_audio(audio_response)
+
+        return {'gigaChat_response': chat_response,
+                'audio_response': ''}
+
+    except:
+        JSONResponse({'error': 'bot was not responses'}, 401)
+
+
+@router.post('/create/tags/')
+async def tags_save(tags: str, token: str):
+    payload = decode_token(token)
+
+    try:
+        id = payload.get("user_id")
+        number = payload.get("number")
+    except:
+        JSONResponse({'error': 'You don\'t authenticated'})
+
+    user = await get_user_by_id_and_login(id, number)
+
+    tag = Tags(user_id=user.id,
+               tag = tags
+               )
+
+    async with async_session() as session:
+        session.add(tag)
+        await session.commit()
+
+    return JSONResponse({'message': 'Tag was added to base'})
+
+@router.delete('/delete/tags')
+async def delete_tags(tag_id: int, token: str):
+    payload = decode_token(token)
+
+    try:
+        id = payload.get("user_id")
+        number = payload.get("number")
+    except:
+        JSONResponse({'error': 'You don\'t authenticated'})
+
+    user = await get_user_by_id_and_login(id, number)
+
+    try:
+        await delete_tag_by_id(tag_id, user.id)
+        return JSONResponse({'message': 'Tag was deleted success'}, 201)
+    except:
+        return JSONResponse({'error': 'There is no tag with that id'}, 403)
+
+
+@router.post('/created/review')
+async def created_review(data: ReviewSchema):
+    payload = decode_token(data.token)
+
+    try:
+        id = payload.get("user_id")
+        number = payload.get("number")
+    except:
+        JSONResponse({'error': 'You don\'t authenticated'})
+
+    user = await get_user_by_id_and_login(id, number)
+    created_at = datetime.utcnow()
+    review = Reviews(user_id = user.id,
+                     name = user.f_name + " " + user.l_name[0] + ".",
+                     review = data.text,
+                     rating = data.rating,
+                     created_at = created_at.date()
+                     )
+
+    async with async_session() as session:
+        session.add(review)
+        await session.commit()
+
+
+@router.post('/get/review')
+async def created_review(token: str):
+    payload = decode_token(token)
+
+    try:
+        id = payload.get("user_id")
+        number = payload.get("number")
+    except:
+        JSONResponse({'error': 'You don\'t authenticated'})
+
+    user = await get_user_by_id_and_login(id, number)
+    reviews = await get_reviews()
+
+    return reviews

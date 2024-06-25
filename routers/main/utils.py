@@ -14,7 +14,9 @@ import uuid
 import os
 import hashlib
 from config import AUTH_GIGACHAT
-
+from transformers import VitsModel, AutoTokenizer
+import torch
+import scipy
 
 #Синтез текста в голос
 def remove_file(path: str):
@@ -23,17 +25,25 @@ def remove_file(path: str):
     except Exception as e:
         print(f"Error removing file: {e}")
 
-def text_in_audio(text: str):
+
+def text_in_audio(text: dict):
+    if len(text) > 1:
+        text_str = 'Карта ' + text[0] + ', ' + text[1]
+    if len(text) == 1:
+        text_str = text_str = ' '.join(text)
 
     filename = f"{uuid.uuid4()}.mp3"
     filepath = os.path.join("static/audio", filename)
 
     # Создание аудио из текста
-    tts = gTTS(text, lang='ru')
+    tts = gTTS(text_str, lang='ru')
     tts.save(filepath)
 
     return FileResponse(path=filepath, filename=filename, media_type='audio/mpeg')
 
+
+def get_order_status(order_id: int):
+    pass
 
 
 
@@ -76,7 +86,7 @@ def get_response_from_gigachat(query: str, cards: list):
     }
 
     payload = {
-        "model": "GigaChat",
+        "model": "GigaChat-Pro",
         "messages": [
             {"role": "user", "content": message}
         ],
@@ -105,6 +115,7 @@ def create_signature(secret_key, request_data):
     signature = hashlib.md5(signature_data.encode()).hexdigest()
     return signature
 
+
 def send_request(api_url, merchant_id, request_data, secret_key):
     # Create the signature
     signature = create_signature(secret_key, request_data)
@@ -118,13 +129,16 @@ def send_request(api_url, merchant_id, request_data, secret_key):
     response = requests.post(api_url, json=data)
     return response
 
+
 # Генерация рандомного id карты
 def generate_random_card():
     return random.randint(1, 78)
 
+
 # Генерация 6 значного кода
 def generate_verify_code(length=6):
     return ''.join(random.choices('0123456789', k=length))
+
 
 # Отправка кода по номеру
 def send_verify_code(phone_number, code):
@@ -132,9 +146,11 @@ def send_verify_code(phone_number, code):
     client = GreenSMS(user=GREEN_SMS_USER, password=GREEN_SMS_PASSWORD)
     client.sms.send(to=phone_number, txt=message)
 
+
 # Генерация числа удачи
 def lucky_num():
     return random.randint(5, 10)
+
 
 # Создание токена
 def create_access_token(data: dict):
@@ -143,6 +159,7 @@ def create_access_token(data: dict):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, PRIVATE_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
 
 # Расшифровка токена
 def decode_token(token: str) -> dict:
@@ -160,10 +177,12 @@ def generate_password_hash(password: str):
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
     return hashed_password.decode('utf-8')
 
+
 # Проверка хеша пароля
 def check_password(password: str, hashed_password: str):
 
     return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
+
 
 # Определение знака зодиака по дате рождения
 def get_zodiac_sign(birthday_date):

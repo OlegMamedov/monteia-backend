@@ -17,6 +17,9 @@ class User(Base):
     zodiac_sign = Column(String)
     lucky_rait = Column(Integer)
     lucky_rait_time = Column(DateTime)
+    referal_link = Column(String)
+    referal_parent = Column(String, default=0)
+    balance = Column(Float)
     role = Column(String, default="user")
 
 class Auth(Base):
@@ -85,9 +88,13 @@ class Divinations(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
+    description = Column(Text)
+    questionForThe_cards = Column(Text)
     count_cards = Column(Integer)
     comment = Column(String)
     price = Column(Float)
+    sale_price = Column(Float)
+
 
 class Positions(Base):
     __tablename__ = 'positions'
@@ -106,3 +113,22 @@ class Orders(Base):
     order_id = Column(BigInteger)
     price = Column(Float)
     response_giga = Column(Text)
+
+
+class Tags(Base):
+    __tablename__ = 'tags'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    tag = Column(String)
+
+
+class Reviews(Base):
+    __tablename__ = 'reviews'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'))
+    name = Column(String)
+    review = Column(Text)
+    rating = Column(Integer)
+    created_at = Column(Date)

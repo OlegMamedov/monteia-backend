@@ -41,5 +41,10 @@ class AuthSchema(BaseModel):
             raise ValueError('Number must be 11 characters long')
         return v
 
+class ReviewSchema(BaseModel):
+    token: str
+    rating: int
+    text: str
+
 class GadanieSchema(BaseModel):
     pass
